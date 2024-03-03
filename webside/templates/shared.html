@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 
 {% block title %}
-Home
+Shared
 {% endblock %}
 
 {% block content %}
-<h1 align="center">Notes</h1>
+<h1 align="center">Notes shared with you</h1>
 
 <form id="notesForm" method="POST">
     <ul class="list-group list-group-flush" id="notes">
@@ -32,26 +32,9 @@ Home
     <br/>
     <div align="center" style="display: flex; justify-content: center;">
         <button type="submit" class="btn btn-primary" formaction="/send-note/">
-            Send as email
-        </button>
-        <div style="width: 10px;"></div>
-        <button type="submit" class="btn btn-primary" formaction="/download-note/">
-            Download as pdf
+            Add to your notes
         </button>
     </div>
 </form>
-<br/>
-<hr>
-<br/>
-<h1 align="center">New note</h1>
-<br/>
-<form method="POST">
-    <textarea name="title" id="title" class="form-control" rows="1" placeholder="Note title"></textarea>
-    <br/>
-    <textarea name="note" id="note" class="form-control" rows="3" placeholder="Note content"></textarea>
-    <br/>
-    <div align="center">
-        <button type="submit" class="btn btn-primary">Add note</button>
-    </div>
-</form>
+
 {% endblock %}
