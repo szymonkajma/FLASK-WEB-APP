@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}
+Home
+{% endblock %}
+
+{% block content %}
+<h1 align="center">Notes</h1>
+
+<form id="notesForm" action="/send-or-download-note" method="POST">
+    <ul class="list-group list-group-flush" id="notes">
+        {% for note in user.notes %}
+        <li class="list-group-item">
+            <div style="display: flex; justify-content: space-between;">
+                <input type="checkbox" value="{{ note.id }}" name="selected_notes[]"></input>
+                {{ note.data }}
+                <button type="button" class="close" onClick="deleteNote({{ note.id }})">
+                    <span area-hidden="true">&times;</span>
+                </button>
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+    <br/>
+    <div align="center" style="display: flex; justify-content: center;">
+        <button type="submit" class="btn btn-primary" name="action" value="send">
+            <a href="/send-notes/{{ selected_notes }}">Send as email</a>
+        </button>
+        <div style="width: 10px;"></div>
+        <button type="submit" class="btn btn-primary" name="action" value="download" id="downloadPdfBtn">
+            <a href="/download-pdf/{{ selected_notes }}">Download as pdf</a>
+        </button>
+    </div>
+</form>
+
+<br/>
+<form method="POST">
+    <textarea name="note" id="note" class="form-control"></textarea>
+    <br />
+    <div align="center">
+        <button type="submit" class="btn btn-primary">Add note</button>
+    </div>
+</form>
+{% endblock %}
