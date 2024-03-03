@@ -7,14 +7,14 @@ Home
 {% block content %}
 <h1 align="center">Notes</h1>
 
-<form id="notesForm" action="/send-or-download-note" method="POST">
+<form id="notesForm" method="POST">
     <ul class="list-group list-group-flush" id="notes">
         {% for note in user.notes %}
         <li class="list-group-item">
             <div style="display: flex; justify-content: space-between;">
                 <input type="checkbox" value="{{ note.id }}" name="selected_notes[]"></input>
                 {{ note.data }}
-                <button type="button" class="close" onClick="deleteNote({{ note.id }})">
+                <button type="submit" class="close" formaction="/note/{{ note.id }}/delete/">
                     <span area-hidden="true">&times;</span>
                 </button>
             </div>
@@ -23,12 +23,12 @@ Home
     </ul>
     <br/>
     <div align="center" style="display: flex; justify-content: center;">
-        <button type="submit" class="btn btn-primary" name="action" value="send">
-            <a href="/send-notes/{{ selected_notes }}">Send as email</a>
+        <button type="submit" class="btn btn-primary" formaction="/send-note/">
+            Send as email
         </button>
         <div style="width: 10px;"></div>
-        <button type="submit" class="btn btn-primary" name="action" value="download" id="downloadPdfBtn">
-            <a href="/download-pdf/{{ selected_notes }}">Download as pdf</a>
+        <button type="submit" class="btn btn-primary" formaction="/download-note/">
+            Download as pdf
         </button>
     </div>
 </form>
@@ -36,7 +36,7 @@ Home
 <br/>
 <form method="POST">
     <textarea name="note" id="note" class="form-control"></textarea>
-    <br />
+    <br/>
     <div align="center">
         <button type="submit" class="btn btn-primary">Add note</button>
     </div>
