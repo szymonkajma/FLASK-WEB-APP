@@ -9,7 +9,7 @@ Shared
 
 <form id="notesForm" method="POST">
     <ul class="list-group list-group-flush" id="notes">
-    {% for note in user.notes %}
+    {% for note in user.shared_notes %}
     <li class="list-group-item">
         <div style="display: flex; justify-content: space-between; align-items: center;">
             <div style="display: flex; flex-direction: column;">
@@ -30,11 +30,15 @@ Shared
     {% endfor %}
     </ul>
     <br/>
+    {% if shared_notes %}
     <div align="center" style="display: flex; justify-content: center;">
-        <button type="submit" class="btn btn-primary" formaction="/send-note/">
+        <button type="submit" class="btn btn-primary" formaction="/add-note/">
             Add to your notes
         </button>
     </div>
+    {% else %}
+    <h3 align="center">No shared notes yet</h3>
+    {% endif %}
 </form>
 
 {% endblock %}

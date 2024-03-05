@@ -66,6 +66,10 @@ def send_notes():
 @views.route('/download-note/', methods=['POST'])
 def download_pdf():
     selected_notes = request.form.getlist('selected_notes[]')
+    if not selected_notes:
+        flash('No notes selected!', category='error')
+        return redirect(url_for('views.home'))
+
     user_name = current_user.first_name
     body = join_notes(selected_notes, joiner="<br/><br/>")
 
@@ -74,6 +78,7 @@ def download_pdf():
     with open(html_file_name, 'w') as file_html:
         file_html.write('''<html>
         <head>
+        <meta charset="utf-8"/>
         </head>
         <body>
         <h2>Here are your notes, ''' + user_name + '''</h2>
@@ -85,9 +90,9 @@ def download_pdf():
     HTML(html_file_name).write_pdf(pdf_file)
 
     flash('PDF downloading!', category='success')
-    redirect(url_for('views.home'))
 
-    return send_file(f'../{pdf_file}', as_attachment=True)
+    return send_file(f'../{pdf_file}', as_attachment=True)  # bardzo bym chciał żeby po tym strona się przeładowała
+
 
 def join_notes(notes, joiner="</br>"):
     body = ""

@@ -5,8 +5,9 @@ Home
 {% endblock %}
 
 {% block content %}
-<h1 align="center">Notes</h1>
 
+{% if user.notes %}
+<h1 align="center">Notes</h1>
 <form id="notesForm" method="POST">
     <ul class="list-group list-group-flush" id="notes">
     {% for note in user.notes %}
@@ -29,20 +30,44 @@ Home
     </li>
     {% endfor %}
     </ul>
-    <br/>
-    <div align="center" style="display: flex; justify-content: center;">
-        <button type="submit" class="btn btn-primary" formaction="/send-note/">
-            Send as email
+    <br>
+    <div align="center">
+        <!-- MODAL button -->
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#shareModal">
+            Share with...
         </button>
-        <div style="width: 10px;"></div>
+        <!-- DOWNLOAD button -->
         <button type="submit" class="btn btn-primary" formaction="/download-note/">
             Download as pdf
         </button>
     </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="shareModal" tabindex="-1" aria-labelledby="shareModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="shareModalLabel">Share with...</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Username:
+                    <input
+                            type="username"
+                            class="form-control"
+                            id="username"
+                            name="username"
+                            placeholder="Enter username"/>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary d-grid mx-auto" formaction="/share-note/">Share</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </form>
-<br/>
 <hr>
-<br/>
+{% endif %}
 <h1 align="center">New note</h1>
 <br/>
 <form method="POST">
@@ -54,4 +79,5 @@ Home
         <button type="submit" class="btn btn-primary">Add note</button>
     </div>
 </form>
+
 {% endblock %}
