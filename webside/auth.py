@@ -1,8 +1,9 @@
-from flask import Blueprint, render_template, request, flash, redirect, url_for
+from flask import Blueprint, render_template, request, flash, redirect, url_for, session
 from .models import User
 from werkzeug.security import generate_password_hash, check_password_hash
 from . import db
 from flask_login import login_user, login_required, logout_user, current_user
+from datetime import datetime
 
 auth = Blueprint('auth', __name__)
 
@@ -72,4 +73,12 @@ def sign_up():
 
 @auth.route('/shared')
 def shared():
-    return render_template("shared.html", user=current_user)
+    user = current_user
+    shared_notes = user.shared_notes.all()
+    shared_by_users = {note.id: note.user.username for note in shared_notes}
+    session.pop('new_items', None)
+
+    current_user.last_checked_shared_notes_date = datetime.utcnow()
+    db.session.commit()
+
+    return render_template("shared.html", user=current_user, shared_notes=shared_notes, shared_by_users=shared_by_users)

@@ -15,6 +15,7 @@ class Note(db.Model):
     date = db.Column(db.DateTime(timezone=True), default=func.now())
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     shared_with = db.relationship('User', secondary=shared_notes, backref=db.backref('shared_notes', lazy='dynamic'))
+    last_checked_shared_notes_date = db.Column(db.DateTime, default=func.now())
 
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
@@ -23,3 +24,4 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String(150))
     first_name = db.Column(db.String(150))
     notes = db.relationship('Note', backref='user')
+    last_checked_shared_notes_date = db.Column(db.DateTime, default=func.now())

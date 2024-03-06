@@ -1,11 +1,9 @@
-import smtplib
-
-from flask import Blueprint, render_template, request, flash, jsonify, send_file, redirect, url_for
+from flask import Blueprint, render_template, request, flash, jsonify, send_file, redirect, url_for, session
 from flask_login import login_required, current_user
 from weasyprint import HTML
 
 from . import db
-from .models import Note
+from .models import Note, User
 
 views = Blueprint('views', __name__)
 
@@ -13,6 +11,11 @@ views = Blueprint('views', __name__)
 @views.route('/', methods=['GET', 'POST'])
 @login_required
 def home():
+    if check_for_new_items(current_user):
+        session['new_items'] = True
+    else:
+        session.pop('new_items', None)
+
     if request.method == 'POST':
         note = request.form.get('note')
         title = request.form.get('title')
@@ -43,25 +46,47 @@ def delete_note(note_id):
     return redirect(url_for('views.home'))
 
 
-@views.route('/send-note/', methods=['POST'])
-def send_notes():
-    selected_notes = request.args.get('selected_notes[]').split(',')
-    user_name = current_user.first_name
-    subject = f'Here are your notes, {user_name}'
-    user_mail = current_user.email
+@views.route('/share-note/', methods=['POST'])
+def share_notes():
+    selected_notes = request.form.getlist('selected_notes[]')
+    username = request.form.get('username')
+    share_with_user = User.query.filter_by(username=username).first()
 
-    body = join_notes(selected_notes, joiner="\n\n")
+    if not selected_notes:
+        flash('No notes selected!', category='error')
+        return redirect(url_for('views.home'))
+    if not share_with_user:
+        flash('Chose user to share with!', category='error')
+        return redirect(url_for('views.home'))
 
-    # tu jest cos zjebane z konfiguracja serwera poczty, ale chyba przez to ze nie chcialem im zaplacic
-    with smtplib.SMTP('live.smtp.mailtrap.io', 587) as smtp:
-        smtp.login('api', 'e89b47ed2b2954dfb93f46e0444dd8ce')
-        mail_contents = f'Subject: {subject}\n\n{body}'
+    for note_id in selected_notes:
+        note = Note.query.get(note_id)
+        if note:
+            if share_with_user not in note.shared_with:
+                note.shared_with.append(share_with_user)
+                db.session.add(note)
+    
+    db.session.commit()
 
-        smtp.sendmail('mailtrap@demomailtrap.com', user_mail, mail_contents)
+    flash('Notes shared!', category='success')
 
-    flash('Notes sent!', category='success')  # to dziala dopiero po odswiezeniu i nie wiem czemu
-    return jsonify({})
+    return redirect(url_for('views.home'))
 
+
+@views.route('/add-note/', methods=['POST'])
+def add_note():
+    selected_notes = request.form.getlist('selected_notes[]')
+
+    for note_id in selected_notes:
+        note = Note.query.get(note_id)
+        if note:
+            current_user.notes.append(note)
+            note.shared_with.remove(current_user)
+            db.session.commit()
+
+    flash('Notes added to your notes!', category='success')
+
+    return redirect(url_for('views.home'))
 
 @views.route('/download-note/', methods=['POST'])
 def download_pdf():
@@ -101,3 +126,11 @@ def join_notes(notes, joiner="</br>"):
         if note:
             body += str(joiner) + str("<b>" + note.title + "</b></br>") + str(note.data)
     return body
+
+
+def check_for_new_items(user):
+    new_shared_notes = []
+    for note in user.shared_notes:
+        if note.date > user.last_checked_shared_notes_date:
+            new_shared_notes.append(note)
+    return len(new_shared_notes) > 0

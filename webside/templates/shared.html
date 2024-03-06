@@ -16,6 +16,8 @@ Shared
                 <input type="checkbox" value="{{ note.id }}" name="selected_notes[]">
             </div>
             <div style="flex: 1; text-align: center;">
+                <b>From: {{ shared_by_users.get(note.id) }}</b>
+                <br>
                 <b>{{ note.title }}</b>
                 <br>
                 {{ note.data }}
