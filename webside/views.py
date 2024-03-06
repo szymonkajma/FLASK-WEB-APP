@@ -129,8 +129,6 @@ def join_notes(notes, joiner="</br>"):
 
 
 def check_for_new_items(user):
-    new_shared_notes = []
     for note in user.shared_notes:
         if note.date > user.last_checked_shared_notes_date:
-            new_shared_notes.append(note)
-    return len(new_shared_notes) > 0
+            return True
