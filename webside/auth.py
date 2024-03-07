@@ -72,13 +72,9 @@ def sign_up():
 
 
 @auth.route('/shared')
+@login_required
 def shared():
-    user = current_user
-    shared_notes = user.shared_notes.all()
-    shared_by_users = {note.id: note.user.username for note in shared_notes}
     session.pop('new_items', None)
+    current_user.reset_last_checked()
 
-    current_user.last_checked_shared_notes_date = datetime.utcnow()
-    db.session.commit()
-
-    return render_template("shared.html", user=current_user, shared_notes=shared_notes, shared_by_users=shared_by_users)
+    return render_template("shared.html")
