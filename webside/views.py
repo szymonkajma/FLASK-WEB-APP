@@ -89,7 +89,7 @@ def add_note():
 
     return redirect(url_for('views.home'))
 
-@views.route('/download-note/', methods=['GET'])
+@views.route('/download-note/', methods=['POST'])
 @login_required
 def download_pdf():
     selected_notes = request.form.getlist('selected_notes[]')
