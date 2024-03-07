@@ -11,7 +11,7 @@ views = Blueprint('views', __name__)
 @views.route('/', methods=['GET', 'POST'])
 @login_required
 def home():
-    if check_for_new_items(current_user):
+    if current_user.has_new_shared_notes():
         session['new_items'] = True
     else:
         session.pop('new_items', None)
@@ -35,6 +35,7 @@ def home():
 
 
 @views.route('/note/<note_id>/delete/', methods=['POST'])
+@login_required
 def delete_note(note_id):
     note = Note.query.get(note_id)
 
@@ -47,6 +48,7 @@ def delete_note(note_id):
 
 
 @views.route('/share-note/', methods=['POST'])
+@login_required
 def share_notes():
     selected_notes = request.form.getlist('selected_notes[]')
     username = request.form.get('username')
@@ -62,9 +64,7 @@ def share_notes():
     for note_id in selected_notes:
         note = Note.query.get(note_id)
         if note:
-            if share_with_user not in note.shared_with:
-                note.shared_with.append(share_with_user)
-                db.session.add(note)
+            note.share(share_with_user)
     
     db.session.commit()
 
@@ -74,14 +74,15 @@ def share_notes():
 
 
 @views.route('/add-note/', methods=['POST'])
+@login_required
 def add_note():
     selected_notes = request.form.getlist('selected_notes[]')
 
     for note_id in selected_notes:
         note = Note.query.get(note_id)
         if note:
-            current_user.notes.append(note)
-            note.shared_with.remove(current_user)
+            copied_note = Note.from_note(owner=current_user, note=note)
+            db.session.add(copied_note)
             db.session.commit()
 
     flash('Notes added to your notes!', category='success')
@@ -89,6 +90,7 @@ def add_note():
     return redirect(url_for('views.home'))
 
 @views.route('/download-note/', methods=['POST'])
+@login_required
 def download_pdf():
     selected_notes = request.form.getlist('selected_notes[]')
     if not selected_notes:
@@ -124,11 +126,6 @@ def join_notes(notes, joiner="</br>"):
     for note_id in notes:
         note = Note.query.get(note_id)
         if note:
-            body += str(joiner) + str("<b>" + note.title + "</b></br>") + str(note.data)
+            body += f"{joiner}<b>{note.title}</b></br>{note.data}"
     return body
 
-
-def check_for_new_items(user):
-    for note in user.shared_notes:
-        if note.date > user.last_checked_shared_notes_date:
-            return True

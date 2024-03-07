@@ -9,14 +9,14 @@ Shared
 
 <form id="notesForm" method="POST">
     <ul class="list-group list-group-flush" id="notes">
-    {% for note in user.shared_notes %}
+    {% for note in current_user.shared_notes %}
     <li class="list-group-item">
         <div style="display: flex; justify-content: space-between; align-items: center;">
             <div style="display: flex; flex-direction: column;">
                 <input type="checkbox" value="{{ note.id }}" name="selected_notes[]">
             </div>
             <div style="flex: 1; text-align: center;">
-                <b>From: {{ shared_by_users.get(note.id) }}</b>
+                <b>From: {{ note.user.username }}</b>
                 <br>
                 <b>{{ note.title }}</b>
                 <br>
@@ -32,7 +32,7 @@ Shared
     {% endfor %}
     </ul>
     <br/>
-    {% if shared_notes %}
+    {% if current_user.shared_notes.count() %}
     <div align="center" style="display: flex; justify-content: center;">
         <button type="submit" class="btn btn-primary" formaction="/add-note/">
             Add to your notes
